@@ -1,2 +1,3 @@
-# purgarr
-Plunder the best, purge the rest!
+# Purgarr
+
+> Plunder the best, purge the rest!
