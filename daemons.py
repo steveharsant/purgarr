@@ -60,25 +60,20 @@ class Daemons:
             stalled_torrents = [
                 t
                 for t in self.torrent_client.get_torrents()
-                if t["state"] == "stalled" and t["age"] > 5
+                if t["state"] == "stalled" and t["age"] > int(config.torrent_age)
             ]
 
-            if stalled_torrents is not None:
+            if stalled_torrents:
                 log("info", f"Purging {len(stalled_torrents)} stalled torrents")
                 self.torrent_client.remove_torrents([t["id"] for t in stalled_torrents])
 
-            if stalled_torrents is not None and config.block_stalled_torrents:
+            if stalled_torrents and config.block_stalled_torrents:
                 for st in stalled_torrents:
-                    for q in sonarr_queue[0]:
-                        if st["name"] == q["title"]:
-                            self.sonarr.block_release(q["title"], q["id"])
-                        # else:
-                        #     log(
-                        #         "warn",
-                        #         "Unable to find matching release for {}".format(
-                        #             st["name"]
-                        #         ),
-                        #     )
+                    match = next(
+                        (q for q in sonarr_queue[0] if q["title"] == st["name"]), None
+                    )
+                    if match:
+                        self.sonarr.block_release(match["title"], match["id"])
 
             m = f"{config.purge_stalled_interval} seconds until next stalled torrents purge"
             log("info", m)

@@ -21,6 +21,7 @@ class QBittorrentClient:
         data = {"username": config.qbit_user, "password": config.qbit_pass}
 
         try:
+            self.session.cookies.clear()
             response = self.session.post(
                 f"{config.qbit_url}/auth/login", headers=headers, data=data
             )
@@ -29,12 +30,13 @@ class QBittorrentClient:
             log("error", f"qBittorrent authentication failed: {e}")
             return
 
-        if "SID" in response.cookies:
-            self.sid = response.cookies["SID"]
-            self.last_sid_refresh = now
-        else:
+        if not "SID" in response.cookies:
             log("error", "SID cookie not found in response")
-            print(response.cookies)
+            return
+
+        self.sid = response.cookies["SID"]
+        self.last_sid_refresh = now
+        log("info", "Refreshed qBittorrent SID cookie")
 
     def get_torrents(self) -> list:
         self.authenticate()
