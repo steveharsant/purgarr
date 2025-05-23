@@ -11,6 +11,7 @@ block_stalled_torrents = os.getenv("BLOCK_STALLED_TORRENTS", "True").lower() == 
 purge_imported = os.getenv("PURGE_IMPORTED", "True").lower() == "true"
 purge_imported_interval = int(os.getenv("PURGE_IMPORTED_INTERVAL", 600))
 delete_files = os.getenv("DELETE_FILES", "True").lower() == "true"
+retry_search = os.getenv("RETRY_SEARCH", "True").lower() == "true"
 
 # Torrents
 torrent_client = os.getenv("TORRENT_CLIENT")

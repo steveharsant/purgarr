@@ -3,12 +3,14 @@ import config
 import sys
 from utils import *
 from services.sonarr import Sonarr
+from services.radarr import Radarr
 from services.qbittorrent import QBittorrentClient
 
 
 class Daemons:
     def __init__(self):
         self.sonarr = Sonarr()
+        self.radarr = Radarr()
 
         match config.torrent_client.lower():
             case "qbittorrent":
@@ -51,12 +53,21 @@ class Daemons:
 
             time.sleep(config.purge_imported_interval)
 
-    def stalled_purgarr(self):
+    def stalled_purgarr(self, service: str, url: str):
         if config.purge_stalled is not True:
             return
 
+        match service.lower():
+            case "sonarr":
+                self.service = self.sonarr
+            case "radarr":
+                self.service = self.radarr
+
         while True:
-            sonarr_queue = self.sonarr.get_queue()
+
+            log("info", f"Retreiving {service} queue records")
+            queue = self.service.get_queue()
+
             stalled_torrents = [
                 t
                 for t in self.torrent_client.get_torrents()
@@ -70,12 +81,12 @@ class Daemons:
             if stalled_torrents and config.block_stalled_torrents:
                 for st in stalled_torrents:
                     match = next(
-                        (q for q in sonarr_queue[0] if q["title"] == st["name"]), None
+                        (q for q in queue[0] if q["title"] == st["name"]), None
                     )
                     if match:
-                        self.sonarr.block_release(match["title"], match["id"])
+                        self.service.block_release(match["title"], match["id"])
 
-            m = f"{config.purge_stalled_interval} seconds until next stalled torrents purge"
+            m = f"{config.purge_stalled_interval} seconds until next stalled {service} torrents purge"
             log("info", m)
 
             time.sleep(config.purge_stalled_interval)

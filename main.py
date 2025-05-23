@@ -16,7 +16,12 @@ def main():
     ).start()
 
     threading.Thread(
-        target=lambda: d.stalled_purgarr(),
+        target=lambda: d.stalled_purgarr(service="sonarr", url=config.sonarr_url),
+        daemon=True,
+    ).start()
+
+    threading.Thread(
+        target=lambda: d.stalled_purgarr(service="radarr", url=config.radarr_url),
         daemon=True,
     ).start()
 
