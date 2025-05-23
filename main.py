@@ -2,9 +2,10 @@ import signal
 import sys
 import threading
 import time
-
 from utils import *
 from daemons import Daemons
+
+__version__ = "0.1.0"
 
 def main():
     signal.signal(signal.SIGINT, handle_sigint)

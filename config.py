@@ -23,20 +23,19 @@ qbit_user = os.getenv("QBIT_USER", "admin")
 qbit_pass = os.getenv("QBIT_PASSWORD")
 qbit_token_refresh_interval = int(os.getenv("QBIT_TOKEN_REFRESH_INTERVAL", 600))
 
-
 # Sonarr
 sonarr_labels = os.getenv("SONARR_LABELS", "tv-sonarr").split(",")
 sonarr_url = f"{os.getenv('SONARR_URL', 'http:// localhost:8989')}/api/v3"
 sonarr_api_key = os.getenv("SONARR_API_KEY")
-sonarr_import_labels = os.getenv("SONARR_IMPORT_LABELS", "sonarr-imported").split(",")
+sonarr_imported_label = os.getenv("SONARR_IMPORTED_LABEL", "sonarr-imported")
 
 # Radarr
 radarr_labels = os.getenv("RADARR_LABELS", "tv-sonarr").split(",")
 radarr_url = f"{os.getenv('RADARR_URL', 'http:// localhost:7878')}/api/v3"
 radarr_api_key = os.getenv("RADARR_API_KEY")
-radarr_import_labels = os.getenv("RADARR_IMPORT_LABELS", "radarr-imported").split(",")
+radarr_imported_label = os.getenv("RADARR_IMPORTED_LABEL", "radarr-imported")
 
 # Other
 import_labels = os.getenv(
-    "IMPORT_LABELS", sonarr_import_labels + radarr_import_labels
+    "IMPORT_LABELS", f"{sonarr_imported_label}, {radarr_imported_label}"
 ).split(",")
