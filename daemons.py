@@ -32,9 +32,6 @@ class Daemons:
         log("info", m)
 
     def imported_purgarr(self):
-        if config.purge_imported is not True:
-            return
-
         while True:
             torrents = [
                 t

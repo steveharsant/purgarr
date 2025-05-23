@@ -10,20 +10,25 @@ def main():
     signal.signal(signal.SIGINT, handle_sigint)
 
     d = Daemons()
-    threading.Thread(
-        target=lambda: d.imported_purgarr(),
-        daemon=True,
-    ).start()
 
-    threading.Thread(
-        target=lambda: d.stalled_purgarr(service="sonarr", url=config.sonarr_url),
-        daemon=True,
-    ).start()
+    if config.purge_imported:
+        threading.Thread(
+            target=lambda: d.imported_purgarr(),
+            daemon=True,
+        ).start()
 
-    threading.Thread(
-        target=lambda: d.stalled_purgarr(service="radarr", url=config.radarr_url),
-        daemon=True,
-    ).start()
+    if config.purge_stalled:
+        stalled_daemons = [
+            {"service": "sonarr", "url": config.sonarr_url},
+            {"service": "radarr", "url": config.radarr_url},
+        ]
+        for sd in stalled_daemons:
+            threading.Thread(
+                target=lambda: d.stalled_purgarr(
+                    service=f"{sd['service']}", url=f"{sd['url']}"
+                ),
+                daemon=True,
+            ).start()
 
     log("startup", "All daemons started")
 
