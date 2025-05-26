@@ -1,81 +1,108 @@
 import requests
 import time
-import config
-from utils import *
+import utils.config as config
+from datetime import datetime
+from utils.log import *
 
 
-def get_auth_token() -> str:
-    if not hasattr(get_auth_token, "last_token_refresh"):
-        get_auth_token.last_token_refresh = 0
+class QBittorrentClient:
+    def __init__(self):
+        self.session = requests.Session()
+        self.sid = None
+        self.last_sid_refresh = 0
 
-    now = time.time()
-    if now - get_auth_token.last_token_refresh > config.qbit_token_refresh_interval:
-        log("info", "Refreshing qBittorrent auth token")
-        get_auth_token.last_token_refresh = now
+    def authenticate(self):
+        now = time.time()
+        if now - self.last_sid_refresh < config.qbit_token_refresh_interval:
+            return
 
+        logger.info("Refreshing qBittorrent auth token")
         headers = {"Referer": config.qbit_url}
         data = {"username": config.qbit_user, "password": config.qbit_pass}
-        session = requests.Session()
 
         try:
-            response = session.post(
+            self.session.cookies.clear()
+            response = self.session.post(
                 f"{config.qbit_url}/auth/login", headers=headers, data=data
             )
-        except:
-            log("error", "qBittorrent authentication failed")
+            response.raise_for_status()
+        except Exception as e:
+            logger.error(f"qBittorrent authentication failed | {e}")
+            return
 
-        if "SID" in response.cookies:
-            global sid
-            sid = response.cookies["SID"]
-        else:
-            log("error", "SID cookie not found in response")
+        if not "SID" in response.cookies:
+            logger.error("SID cookie not found in response")
+            return
 
+        self.sid = response.cookies["SID"]
+        self.last_sid_refresh = now
+        logger.info("Refreshed qBittorrent SID cookie")
 
-def get_torrents() -> dict:
-    get_auth_token()
-    try:
-        response = requests.get(
-            f"{config.qbit_url}/torrents/info", cookies={"SID": sid}
-        )
-        return response.json()
-    except Exception as e:
-        log("error", f"Get imported torrents failed: {e}")
-        return []
+    def get_torrents(self) -> list:
+        self.authenticate()
 
+        try:
+            response = self.session.get(
+                f"{config.qbit_url}/torrents/info", cookies={"SID": self.sid}
+            )
+        except Exception as e:
+            logger.error(f"Failed to get torrents| {e}")
+            return []
 
-def remove_torrents(hashes: list):
-    get_auth_token()
-    hashes = "|".join(h for h in hashes)
-    try:
-        response = requests.post(
-            f"{config.qbit_url}/torrents/delete",
-            cookies={"SID": sid},
-            data={"hashes": hashes, "deleteFiles": config.delete_files},
-        )
-    except:
-        log("error", "Failed to remove imported torrents")
+        results = []
 
+        for t in response.json():
+            added = datetime.fromtimestamp(int(t["added_on"]))
+            now = datetime.now()
+            age = (now - added).total_seconds() / 60
 
-def version():
-    get_auth_token()
-    response = requests.get(f"{config.qbit_url}/app/version", cookies={"SID": sid})
-    return response.text
+            match t["state"]:
+                case "error":
+                    state = "error"
+                case "pausedUP" | "queuedUP" | "uploading" | "stalledUP" | "stoppedUP":
+                    state = "finished"
+                case "downloading" | "checkingUP" | "checkingDL":
+                    state = "processing"
+                case "pausedDL":
+                    state = "paused"
+                case "queuedDL":
+                    state = "queued"
+                case "stalledDL" | "metaDL":
+                    state = "stalled"
+                case _:
+                    state = "unknown"
 
+            results.append(
+                {
+                    "age": age,
+                    "category": t["category"],
+                    "id": t["hash"],
+                    "name": t["name"],
+                    "state": state,
+                }
+            )
 
-def purge_daemon(name: str, match_key: str, match_values: str, wait_interval: int):
-    while True:
-        matched_torrents = []
-        for torrent in get_torrents():
-            if torrent[match_key] in match_values:
-                matched_torrents.append(torrent)
+        return results
 
-        count = len(matched_torrents)
-        if count > 0:
-            log("info", f"Purging {count} {name.lower()} torrents")
-            hashes = [t["hash"] for t in matched_torrents]
-            remove_torrents(hashes)
-        else:
-            log("info", f"No torrents matching {match_key} = {match_values}")
+    def remove_torrents(self, hashes: list):
+        self.authenticate()
+        hash_str = "|".join(hashes)
+        try:
+            self.session.post(
+                f"{config.qbit_url}/torrents/delete",
+                cookies={"SID": self.sid},
+                data={"hashes": hash_str, "deleteFiles": config.delete_files},
+            )
+        except Exception as e:
+            logger.error(f"Failed to remove torrents| {e}")
 
-        log("info", f"{wait_interval} seconds until next {name.lower()} torrents purge")
-        time.sleep(wait_interval)
+    def version(self) -> str:
+        self.authenticate()
+        try:
+            response = self.session.get(
+                f"{config.qbit_url}/app/version", cookies={"SID": self.sid}
+            )
+            return response.text
+        except Exception as e:
+            logger.error(f"Failed to fetch version| {e}")
+            return "unknown"

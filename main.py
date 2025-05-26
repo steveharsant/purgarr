@@ -1,74 +1,46 @@
-import time
+from utils.daemons import Daemons
+from utils.log import logger
+import utils.config as config
+
 import signal
 import sys
 import threading
-
-import config
-import services.sonarr as sonarr
-
-from utils import *
+import time
 
 
-torrent_client = set_torrent_client()
-
-try:
-    torrent_client_version = torrent_client.version()
-except:
-    log(
-        "error",
-        f"Failed to communicate with torrent client: {config.torrent_client}",
-    )
-    sys.exit(1)
-
-log(
-    "info",
-    f"Torrent client {config.torrent_client} with version {torrent_client_version} is accessible",
-)
-
+__version__ = "0.1.0"
 
 def main():
     signal.signal(signal.SIGINT, handle_sigint)
 
-    daemons = [
-        {
-            "name": "Imported",
-            "enabled": config.purge_imported,
-            "match_key": "category",
-            "match_values": config.import_labels,
-            "wait_interval": config.purge_imported_interval,
-        },
-        {
-            "name": "Stalled",
-            "enabled": config.purge_stalled,
-            "match_key": "state",
-            "match_values": ["stalledDL", "metaDL"],
-            "wait_interval": config.purge_stalled_interval,
-        },
-    ]
+    d = Daemons()
 
-    for daemon in daemons:
-        if daemon["enabled"] is True:
-            log(
-                "info",
-                f"Starting {daemon['name'].lower()} torrent purgarr daemon",
-                True,
-            )
+    if config.purge_imported:
+        threading.Thread(
+            target=lambda: d.imported_purgarr(),
+            daemon=True,
+        ).start()
+
+    if config.purge_stalled:
+        stalled_daemons = [
+            {"service": "sonarr", "url": config.sonarr_url},
+            {"service": "radarr", "url": config.radarr_url},
+        ]
+        for sd in stalled_daemons:
             threading.Thread(
-                target=lambda: torrent_client.purge_daemon(
-                    name=daemon["name"],
-                    match_key=daemon["match_key"],
-                    match_values=daemon["match_values"],
-                    wait_interval=daemon["wait_interval"],
+                target=lambda: d.stalled_purgarr(
+                    service=f"{sd['service']}", url=f"{sd['url']}"
                 ),
                 daemon=True,
             ).start()
-            time.sleep(3)  # sleep to prevent race condition with qbit auth token
+
+    logger.log("STARTUP", "All daemons started")
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        log("info", "Stopping Purgarr", True)
+        logger.info("Stopping Purgarr", True)
 
 
 def handle_sigint(signum, frame):
