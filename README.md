@@ -25,7 +25,7 @@ docker run --name purgarr \
   -e SONARR_URL='ip-address-or-hostname-with-port' \
   -e RADARR_API_KEY='password' \
   -e RADARR_URL='ip-address-or-hostname-with-port' \
-  ghcr.io/steveharsant/purgarr
+  ghcr.io/steveharsant/purgarr:latest
 ```
 
 ### Docker Compose
