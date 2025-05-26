@@ -1,8 +1,8 @@
 import requests
 import time
-import config
+import utils.config as config
 from datetime import datetime
-from utils import *
+from utils.log import *
 
 
 class QBittorrentClient:
@@ -16,7 +16,7 @@ class QBittorrentClient:
         if now - self.last_sid_refresh < config.qbit_token_refresh_interval:
             return
 
-        log("info", "Refreshing qBittorrent auth token")
+        logger.info("Refreshing qBittorrent auth token")
         headers = {"Referer": config.qbit_url}
         data = {"username": config.qbit_user, "password": config.qbit_pass}
 
@@ -27,16 +27,16 @@ class QBittorrentClient:
             )
             response.raise_for_status()
         except Exception as e:
-            log("error", f"qBittorrent authentication failed: {e}")
+            logger.error(f"qBittorrent authentication failed | {e}")
             return
 
         if not "SID" in response.cookies:
-            log("error", "SID cookie not found in response")
+            logger.error("SID cookie not found in response")
             return
 
         self.sid = response.cookies["SID"]
         self.last_sid_refresh = now
-        log("info", "Refreshed qBittorrent SID cookie")
+        logger.info("Refreshed qBittorrent SID cookie")
 
     def get_torrents(self) -> list:
         self.authenticate()
@@ -46,7 +46,7 @@ class QBittorrentClient:
                 f"{config.qbit_url}/torrents/info", cookies={"SID": self.sid}
             )
         except Exception as e:
-            log("error", f"Failed to get torrents: {e}")
+            logger.error(f"Failed to get torrents| {e}")
             return []
 
         results = []
@@ -94,7 +94,7 @@ class QBittorrentClient:
                 data={"hashes": hash_str, "deleteFiles": config.delete_files},
             )
         except Exception as e:
-            log("error", f"Failed to remove torrents: {e}")
+            logger.error(f"Failed to remove torrents| {e}")
 
     def version(self) -> str:
         self.authenticate()
@@ -104,5 +104,5 @@ class QBittorrentClient:
             )
             return response.text
         except Exception as e:
-            log("error", f"Failed to fetch version: {e}")
+            logger.error(f"Failed to fetch version| {e}")
             return "unknown"

@@ -1,9 +1,12 @@
+from utils.daemons import Daemons
+from utils.log import logger
+import utils.config as config
+
 import signal
 import sys
 import threading
 import time
-from utils import *
-from daemons import Daemons
+
 
 __version__ = "0.1.0"
 
@@ -31,13 +34,13 @@ def main():
                 daemon=True,
             ).start()
 
-    log("startup", "All daemons started")
+    logger.log("STARTUP", "All daemons started")
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        log("info", "Stopping Purgarr", True)
+        logger.info("Stopping Purgarr", True)
 
 
 def handle_sigint(signum, frame):

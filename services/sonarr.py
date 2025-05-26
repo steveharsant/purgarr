@@ -1,7 +1,7 @@
 import time
 import requests
-import config
-from utils import *
+import utils.config as config
+from utils.log import *
 from services.base_arrs import Base
 
 

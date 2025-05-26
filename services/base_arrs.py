@@ -1,6 +1,6 @@
 import requests
-import config
-from utils import *
+import utils.config as config
+from utils.log import *
 
 
 class Base:
@@ -21,7 +21,7 @@ class Base:
                     params=params,
                 )
             except Exception as e:
-                log("error", f"Failed to retrieve records from {url}")
+                logger.error(f"Failed to retrieve records from {url}")
                 break
 
             records.append(response.json()["records"])
@@ -52,9 +52,9 @@ class Base:
         )
 
         if response.json().get("message") == "NotFound":
-            log("warn", f"Unable to find queue item for blocklist: {title}")
+            logger.warning(f"Unable to find queue item for blocklist: {title}")
             return False
         else:
-            log("info", f"Added {title} to blocklist")
+            logger.info(f"Added {title} to blocklist")
 
         return True

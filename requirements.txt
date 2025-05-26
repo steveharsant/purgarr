@@ -1,2 +1,3 @@
-requests
+loguru
 python-dotenv
+requests

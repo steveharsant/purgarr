@@ -4,7 +4,7 @@ import os
 load_dotenv()
 
 # Purgarr Behaviour
-log_level = os.getenv("LOG_LEVEL", "info")
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 purge_stalled = os.getenv("PURGE_STALLED", "True").lower() == "true"
 purge_stalled_interval = int(os.getenv("PURGE_STALLED_INTERVAL", 300))
 block_stalled_torrents = os.getenv("BLOCK_STALLED_TORRENTS", "True").lower() == "true"

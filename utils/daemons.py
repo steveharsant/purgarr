@@ -1,7 +1,7 @@
 import time
-import config
+import utils.config as config
 import sys
-from utils import *
+from utils.log import *
 from services.sonarr import Sonarr
 from services.radarr import Radarr
 from services.qbittorrent import QBittorrentClient
@@ -16,20 +16,15 @@ class Daemons:
             case "qbittorrent":
                 self.torrent_client = QBittorrentClient()
             case _:
-                log("error", f"Unsupported torrent client: {config.torrent_client}")
+                logger.critical(f"Unsupported torrent client: {config.torrent_client}")
                 sys.exit(1)
-
         try:
-            self.torrent_client_version = self.torrent_client.version()
-        except Exception:
-            log(
-                "error",
-                f"Failed to communicate with torrent client: {config.torrent_client}",
-            )
-            sys.exit(1)
 
-        m = f"Torrent client {config.torrent_client} with version {self.torrent_client_version} is accessible"
-        log("info", m)
+            self.torrent_client_version = self.torrent_client.version()
+            logger.info(f"Found {config.torrent_client} {self.torrent_client_version}")
+        except Exception:
+            logger.error(f"Failed to communicate with {config.torrent_client}")
+            sys.exit(1)
 
     def imported_purgarr(self):
         while True:
@@ -40,13 +35,14 @@ class Daemons:
             ]
 
             if torrents is not None:
-                log("info", f"Purging {len(torrents)} imported torrents")
+                logger.info(f"Purging {len(torrents)} imported torrents")
                 self.torrent_client.remove_torrents([t["id"] for t in torrents])
             else:
-                log("info", f"No imported torrents to purge")
+                logger.info(f"No imported torrents to purge")
 
-            m = f"{config.purge_imported_interval} seconds until next imported torrents purge"
-            log("info", m)
+            logger.info(
+                f"{config.purge_imported_interval} seconds until next imported torrents purge"
+            )
 
             time.sleep(config.purge_imported_interval)
 
@@ -62,7 +58,7 @@ class Daemons:
 
         while True:
 
-            log("info", f"Retreiving {service} queue records")
+            logger.info(f"Retreiving {service} queue records")
             queue = self.service.get_queue()
 
             stalled_torrents = [
@@ -72,7 +68,7 @@ class Daemons:
             ]
 
             if stalled_torrents:
-                log("info", f"Purging {len(stalled_torrents)} stalled torrents")
+                logger.info(f"Purging {len(stalled_torrents)} stalled torrents")
                 self.torrent_client.remove_torrents([t["id"] for t in stalled_torrents])
 
             if stalled_torrents and config.block_stalled_torrents:
@@ -84,6 +80,6 @@ class Daemons:
                         self.service.block_release(match["title"], match["id"])
 
             m = f"{config.purge_stalled_interval} seconds until next stalled {service} torrents purge"
-            log("info", m)
+            logger.info(m)
 
             time.sleep(config.purge_stalled_interval)
