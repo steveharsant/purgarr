@@ -1,6 +1,6 @@
 import requests
 import utils.config as config
-from utils.log import *
+from utils.logger import *
 
 
 class Base:

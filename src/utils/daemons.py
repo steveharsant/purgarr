@@ -1,7 +1,7 @@
 import time
 import utils.config as config
 import sys
-from utils.log import *
+from utils.logger import *
 from services.sonarr import Sonarr
 from services.radarr import Radarr
 from services.qbittorrent import QBittorrentClient

@@ -14,7 +14,7 @@ delete_files = os.getenv("DELETE_FILES", "True").lower() == "true"
 retry_search = os.getenv("RETRY_SEARCH", "True").lower() == "true"
 
 # Torrents
-torrent_client = os.getenv("TORRENT_CLIENT")
+torrent_client = os.getenv("TORRENT_CLIENT", "qbittorrent")
 torrent_age = os.getenv("TORRENT_AGE", 5)
 
 # qBittorrent
@@ -30,7 +30,7 @@ sonarr_api_key = os.getenv("SONARR_API_KEY")
 sonarr_imported_label = os.getenv("SONARR_IMPORTED_LABEL", "sonarr-imported")
 
 # Radarr
-radarr_labels = os.getenv("RADARR_LABELS", "tv-sonarr").split(",")
+radarr_labels = os.getenv("RADARR_LABELS", "radarr").split(",")
 radarr_url = f"{os.getenv('RADARR_URL', 'http:// localhost:7878')}/api/v3"
 radarr_api_key = os.getenv("RADARR_API_KEY")
 radarr_imported_label = os.getenv("RADARR_IMPORTED_LABEL", "radarr-imported")

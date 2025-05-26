@@ -2,7 +2,7 @@ import requests
 import time
 import utils.config as config
 from datetime import datetime
-from utils.log import *
+from utils.logger import *
 
 
 class QBittorrentClient:
