@@ -1,5 +1,5 @@
 from utils.daemons import Daemons
-from utils.log import logger
+from utils.logger import logger
 import utils.config as config
 
 import signal
@@ -9,6 +9,7 @@ import time
 
 
 __version__ = "0.1.0"
+
 
 def main():
     signal.signal(signal.SIGINT, handle_sigint)
