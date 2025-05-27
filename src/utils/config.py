@@ -3,6 +3,11 @@ import os
 
 load_dotenv()
 
+
+def ensure_http(url):
+    return url if url.startswith(("http://", "https://")) else "http://" + url
+
+
 # Purgarr Behaviour
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 purge_stalled = os.getenv("PURGE_STALLED", "True").lower() == "true"
@@ -18,20 +23,20 @@ torrent_client = os.getenv("TORRENT_CLIENT", "qbittorrent")
 torrent_age = os.getenv("TORRENT_AGE", 5)
 
 # qBittorrent
-qbit_url = f"{os.getenv('QBIT_URL', 'http:// localhost:8080')}/api/v2"
+qbit_url = ensure_http(os.getenv("QBIT_URL", "localhost:8080")) + "/api/v2"
 qbit_user = os.getenv("QBIT_USER", "admin")
 qbit_pass = os.getenv("QBIT_PASSWORD")
 qbit_token_refresh_interval = int(os.getenv("QBIT_TOKEN_REFRESH_INTERVAL", 600))
 
 # Sonarr
 sonarr_labels = os.getenv("SONARR_LABELS", "tv-sonarr").split(",")
-sonarr_url = f"{os.getenv('SONARR_URL', 'http:// localhost:8989')}/api/v3"
+sonarr_url = ensure_http(os.getenv("SONARR_URL", "localhost:8989")) + "/api/v3"
 sonarr_api_key = os.getenv("SONARR_API_KEY")
 sonarr_imported_label = os.getenv("SONARR_IMPORTED_LABEL", "sonarr-imported")
 
 # Radarr
 radarr_labels = os.getenv("RADARR_LABELS", "radarr").split(",")
-radarr_url = f"{os.getenv('RADARR_URL', 'http:// localhost:7878')}/api/v3"
+radarr_url = ensure_http(os.getenv("RADARR_URL", "localhost:7878")) + "/api/v3"
 radarr_api_key = os.getenv("RADARR_API_KEY")
 radarr_imported_label = os.getenv("RADARR_IMPORTED_LABEL", "radarr-imported")
 
