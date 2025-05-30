@@ -45,4 +45,11 @@ logger.add(
     colorize=True,
 )
 
+logger.add(
+    "purgarr.log",
+    format="{time:YYYY-MM-DD HH:mm:ss} [{level}] {message}",
+    filter=custom_filter,
+    rotation="10 MB",
+)
+
 __all__ = ["logger"]

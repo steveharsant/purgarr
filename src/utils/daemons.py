@@ -2,6 +2,7 @@ import time
 import utils.config as config
 import sys
 from utils.logger import *
+from utils.webui import *
 from services.sonarr import Sonarr
 from services.radarr import Radarr
 from services.qbittorrent import QBittorrentClient
@@ -83,3 +84,9 @@ class Daemons:
             logger.info(m)
 
             time.sleep(config.purge_stalled_interval)
+
+    def webui(self, port=9891):
+        server_address = ("", port)
+        httpd = HTTPServer(server_address, LogHandler)
+        logger.info(f"Starting log server at http://localhost:{port}")
+        httpd.serve_forever()

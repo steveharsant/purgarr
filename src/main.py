@@ -1,20 +1,21 @@
 from utils.daemons import Daemons
 from utils.logger import logger
 import utils.config as config
-
 import signal
 import sys
 import threading
 import time
 
 
-__version__ = "0.1.3"
-
+__version__ = "0.2.0-alpha1"
 
 def main():
     signal.signal(signal.SIGINT, handle_sigint)
 
     d = Daemons()
+
+    server_thread = threading.Thread(target=d.webui, kwargs={"port": 9891}, daemon=True)
+    server_thread.start()
 
     if config.purge_imported:
         threading.Thread(
@@ -49,4 +50,5 @@ def handle_sigint(signum, frame):
 
 
 if __name__ == "__main__":
+    logger.info(f"Purgarr version {__version__} starting")
     main()
