@@ -40,6 +40,10 @@ radarr_url = ensure_http(os.getenv("RADARR_URL", "localhost:7878")) + "/api/v3"
 radarr_api_key = os.getenv("RADARR_API_KEY")
 radarr_imported_label = os.getenv("RADARR_IMPORTED_LABEL", "radarr-imported")
 
+# webUI
+log_lines = int(os.getenv("LOG_LINES", 100))
+log_refresh_interval = int(os.getenv("LOG_REFRESH_INTERVAL", 5))
+
 # Other
 import_labels = os.getenv(
     "IMPORT_LABELS", f"{sonarr_imported_label}, {radarr_imported_label}"

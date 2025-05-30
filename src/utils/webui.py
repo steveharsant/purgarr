@@ -1,6 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
-from utils.logger import logger
+import socket
+import utils.config as config
 
 LOG_FILE = "purgarr.log"
 
@@ -19,7 +20,7 @@ class LogHandler(BaseHTTPRequestHandler):
         elif self.path == "/logs":
             if os.path.exists(LOG_FILE):
                 with open(LOG_FILE, "r") as f:
-                    logs = f.readlines()[-100:]
+                    logs = f.readlines()[-config.log_lines :]
                     log_data = "".join(logs)
             else:
                 log_data = "Log file not found."
@@ -34,26 +35,27 @@ class LogHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def html_page(self):
-        return """
+        hostname = socket.gethostname()
+        return f"""
 <html>
 <head>
   <title>Purgarr Logs</title>
   <style>
-    body {
+    body {{
       background: #1e1e2f;
       color: #d0d0f0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
       margin: 2rem;
-    }
-    h1 {
+    }}
+    h1 {{
       color: #89b4fa;
       font-weight: 700;
       margin-bottom: 1rem;
       border-bottom: 2px solid #89b4fa;
       padding-bottom: 0.25rem;
       user-select: none;
-    }
-    pre {
+    }}
+    pre {{
       background: #2e2e4d;
       padding: 1rem;
       border-radius: 6px;
@@ -63,25 +65,25 @@ class LogHandler(BaseHTTPRequestHandler):
       font-size: 0.9rem;
       line-height: 1.4;
       white-space: pre-wrap;
-    }
+    }}
   </style>
   <script>
-    function fetchLogs() {
+    function fetchLogs() {{
       fetch('/logs')
         .then(response => response.text())
-        .then(data => {
+        .then(data => {{
           const logContainer = document.getElementById('log');
           logContainer.textContent = data;
           logContainer.scrollTop = logContainer.scrollHeight;
-        });
-    }
+        }});
+    }}
 
-    setInterval(fetchLogs, 5000); // every 2 seconds
+    setInterval(fetchLogs, {config.log_refresh_interval}000);
     window.onload = fetchLogs;
   </script>
 </head>
 <body>
-  <h1>Purgarr Logs</h1>
+  <h1>Purgarr Logs ({hostname})</h1>
   <pre id="log">Loading...</pre>
 </body>
 </html>
