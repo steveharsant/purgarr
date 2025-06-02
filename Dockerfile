@@ -3,6 +3,7 @@
 FROM alpine:latest
 
 LABEL author="steveharsant"
+LABEL org.opencontainers.image.description='Purgarr: Plunder the best, purge the rest!'
 
 WORKDIR /app
 COPY ./src .

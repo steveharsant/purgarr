@@ -54,9 +54,12 @@ The minimum setup assumes Purgarr is running on the same host as your Arr stack.
 
 | Environment Variable        | Type   | Description                                                                                                                                              | Default         | Required |
 |-----------------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|----------|
+| WEB_HOST                    | string | DNS name for where to access the running webUI                                                                                                           | localhost       | No       |
+| WEB_PORT                    | int    | The port to run the webUI on                                                                                                                             | 9891            | No       |
 | LOG_LEVEL                   | string | Minimum level of logs to print (Options: `info`, `warn`, `error`)                                                                                        | info            | No       |
 | LOG_LINES                   | int    | Number of (most recent) log lines to show in the webUI                                                                                                   | 100             | No       |
 | LOG_REFRESH_INTERVAL        | int    | How often new log entried are fetched and displayed in the webUI (seconds)                                                                               | 5 (seconds)     | No       |
+| LOG_OUTPUT                  | string | Log output type (**Accepted values:** `all`, `stdout`, `web`)                                                                                            | all             | No       |
 | PURGE_STALLED               | string | Enabled/Disable purge of stalled torrents.                                                                                                               | True            | No       |
 | PURGE_STALLED_INTERVAL      | int    | Time in seconds between stalled torrent purges                                                                                                           | 300 (seconds)   | No       |
 | BLOCK_STALLED_TORRENTS      | bool   | Block stalled torrents in Sonarr/Radarr                                                                                                                  | True            | No       |
