@@ -13,6 +13,7 @@ if os.name == "nt":
 
 logger.remove()
 logger.level("STARTUP", no=25, color="<cyan><bold>")
+logger.level("ACTION", no=25, color="<yellow><bold>")
 
 valid_levels = {"INFO", "WARNING", "ERROR", "CRITICAL"}
 if config.log_level not in valid_levels:
@@ -23,12 +24,13 @@ level_priority = {
     "STARTUP": 0,
     "CRITICAL": 1,
     "ERROR": 2,
-    "WARNING": 3,
-    "WARN": 3,
-    "INFO": 4,
+    "ACTION": 3,
+    "WARNING": 4,
+    "WARN": 4,
+    "INFO": 5,
 }
 
-min_priority = level_priority.get(config.log_level, 4)
+min_priority = level_priority.get(config.log_level, 5)
 
 
 def custom_filter(record):

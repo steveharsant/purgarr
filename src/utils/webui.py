@@ -21,29 +21,32 @@ class LogHandler(BaseHTTPRequestHandler):
         elif self.path == "/logs":
             if os.path.exists(LOG_FILE):
                 with open(LOG_FILE, "r") as f:
-                    logs = f.readlines()[-config.log_lines :]
+                    formatted_logs = []
                     log_pattern = re.compile(
                         r"^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\] (?P<message>.*)$"
                     )
-                    html_lines = []
+
+                    logs = f.readlines()[-config.log_lines :]
 
                     for log in logs:
                         match = log_pattern.match(log.strip())
+
                         if match:
                             time = (
                                 f"<span class='log-time'>{match.group('time')}</span>"
                             )
                             level = f"<span class='log-level log-{match.group('level').lower()}'>{match.group('level')}</span>"
                             message = f"<span class='log-message'>{match.group('message')}</span>"
-                            html_lines.append(
+                            formatted_logs.append(
                                 f"<div class='log-line'>{time} {level} {message}</div>"
                             )
-                        else:
-                            html_lines.append(
-                                f"<div class='log-line'>{log.strip()}</div>"
-                            )  # fallback for unmatched lines
 
-                    log_data = "\n".join(html_lines)
+                        else:  # fallback for unmatched lines
+                            formatted_logs.append(
+                                f"<div class='log-line'>{log.strip()}</div>"
+                            )
+
+                    log_data = "\n".join(formatted_logs)
             else:
                 log_data = "Log file not found."
 
@@ -85,15 +88,14 @@ class LogHandler(BaseHTTPRequestHandler):
       height: 80vh;
       box-shadow: 0 0 10px #0005;
       font-size: 0.9rem;
-      line-height: 1.4;
       font-family: monospace;
-      white-space: pre-wrap;
     }}
-    .log-line {{ margin-bottom: -20px; }}
+    .log-line {{ margin-bottom: 4px; }}
     .log-time {{ color: #aaa; }}
     .log-level {{ font-weight: bold; margin: 0 0.5rem; }}
     .log-info {{ color: #8ec07c; }}
     .log-error {{ color: #fb4934; }}
+    .log-action {{ color: #e4fb34; }}
     .log-warning {{ color: #fabd2f; }}
     .log-debug {{ color: #83a598; }}
     .log-startup {{ color: #d3869b; }}

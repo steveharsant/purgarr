@@ -6,7 +6,6 @@ import sys
 import threading
 import time
 
-
 __version__ = "0.2.0-alpha1"
 
 def main():
@@ -15,10 +14,12 @@ def main():
     d = Daemons()
 
     if config.log_output in ["all", "web"]:
+        logger.log("STARTUP", "Starting Purgarr webUI daemon")
         server_thread = threading.Thread(target=d.webui, daemon=True)
         server_thread.start()
 
     if config.purge_imported:
+        logger.log("STARTUP", "Starting import Purgarr daemon")
         threading.Thread(
             target=lambda: d.imported_purgarr(),
             daemon=True,
@@ -30,12 +31,15 @@ def main():
             {"service": "radarr", "url": config.radarr_url},
         ]
         for sd in stalled_daemons:
+            logger.log("STARTUP", f"Starting {sd['service']} stalled Purgarr daemon")
             threading.Thread(
                 target=lambda: d.stalled_purgarr(
                     service=f"{sd['service']}", url=f"{sd['url']}"
                 ),
                 daemon=True,
             ).start()
+
+            time.sleep(5)
 
     logger.log("STARTUP", "All daemons started")
 
