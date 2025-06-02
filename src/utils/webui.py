@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
 import socket
 import utils.config as config
+import re
 
 LOG_FILE = "purgarr.log"
 
@@ -21,7 +22,28 @@ class LogHandler(BaseHTTPRequestHandler):
             if os.path.exists(LOG_FILE):
                 with open(LOG_FILE, "r") as f:
                     logs = f.readlines()[-config.log_lines :]
-                    log_data = "".join(logs)
+                    log_pattern = re.compile(
+                        r"^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>[A-Z]+)\] (?P<message>.*)$"
+                    )
+                    html_lines = []
+
+                    for log in logs:
+                        match = log_pattern.match(log.strip())
+                        if match:
+                            time = (
+                                f"<span class='log-time'>{match.group('time')}</span>"
+                            )
+                            level = f"<span class='log-level log-{match.group('level').lower()}'>{match.group('level')}</span>"
+                            message = f"<span class='log-message'>{match.group('message')}</span>"
+                            html_lines.append(
+                                f"<div class='log-line'>{time} {level} {message}</div>"
+                            )
+                        else:
+                            html_lines.append(
+                                f"<div class='log-line'>{log.strip()}</div>"
+                            )  # fallback for unmatched lines
+
+                    log_data = "\n".join(html_lines)
             else:
                 log_data = "Log file not found."
 
@@ -55,7 +77,7 @@ class LogHandler(BaseHTTPRequestHandler):
       padding-bottom: 0.25rem;
       user-select: none;
     }}
-    pre {{
+    .log-container {{
       background: #2e2e4d;
       padding: 1rem;
       border-radius: 6px;
@@ -64,8 +86,18 @@ class LogHandler(BaseHTTPRequestHandler):
       box-shadow: 0 0 10px #0005;
       font-size: 0.9rem;
       line-height: 1.4;
+      font-family: monospace;
       white-space: pre-wrap;
     }}
+    .log-line {{ margin-bottom: -20px; }}
+    .log-time {{ color: #aaa; }}
+    .log-level {{ font-weight: bold; margin: 0 0.5rem; }}
+    .log-info {{ color: #8ec07c; }}
+    .log-error {{ color: #fb4934; }}
+    .log-warning {{ color: #fabd2f; }}
+    .log-debug {{ color: #83a598; }}
+    .log-startup {{ color: #d3869b; }}
+    .log-message {{ color: #ebdbb2; }}
   </style>
   <script>
     function fetchLogs() {{
@@ -73,7 +105,7 @@ class LogHandler(BaseHTTPRequestHandler):
         .then(response => response.text())
         .then(data => {{
           const logContainer = document.getElementById('log');
-          logContainer.textContent = data;
+          logContainer.innerHTML = data;
           logContainer.scrollTop = logContainer.scrollHeight;
         }});
     }}
@@ -84,7 +116,7 @@ class LogHandler(BaseHTTPRequestHandler):
 </head>
 <body>
   <h1>Purgarr Logs ({hostname})</h1>
-  <pre id="log">Loading...</pre>
+  <div id="log" class="log-container">Loading...</div>
 </body>
 </html>
 """

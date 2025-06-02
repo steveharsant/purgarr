@@ -85,8 +85,8 @@ class Daemons:
 
             time.sleep(config.purge_stalled_interval)
 
-    def webui(self, port=9891):
-        server_address = ("", port)
+    def webui(self):
+        server_address = ("", config.web_port)
         httpd = HTTPServer(server_address, LogHandler)
-        logger.info(f"Starting log server at http://localhost:{port}")
+        logger.info(f"Starting log server at {config.web_host}:{config.web_port}")
         httpd.serve_forever()

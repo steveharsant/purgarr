@@ -18,6 +18,7 @@ purge_imported_interval = int(os.getenv("PURGE_IMPORTED_INTERVAL", 600))
 delete_files = os.getenv("DELETE_FILES", "True").lower() == "true"
 retry_search = os.getenv("RETRY_SEARCH", "True").lower() == "true"
 log_output = os.getenv("LOG_OUTPUT", "all").lower()
+web_host = os.getenv("WEB_HOST", "http://localhost").lower()
 web_port = int(os.getenv("WEB_PORT", 9891))
 
 # Torrents

@@ -15,9 +15,7 @@ def main():
     d = Daemons()
 
     if config.log_output in ["all", "web"]:
-        server_thread = threading.Thread(
-            target=d.webui, kwargs={"port": config.web_port}, daemon=True
-        )
+        server_thread = threading.Thread(target=d.webui, daemon=True)
         server_thread.start()
 
     if config.purge_imported:

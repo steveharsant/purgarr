@@ -52,6 +52,7 @@ if config.log_output in ["all", "web"]:
         format="{time:YYYY-MM-DD HH:mm:ss} [{level}] {message}",
         filter=custom_filter,
         rotation="10 MB",
+        colorize=False,
     )
 
 __all__ = ["logger"]
