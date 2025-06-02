@@ -36,7 +36,6 @@ class QBittorrentClient:
 
         self.sid = response.cookies["SID"]
         self.last_sid_refresh = now
-        logger.info("Refreshed qBittorrent SID cookie")
 
     def get_torrents(self) -> list:
         self.authenticate()
@@ -94,7 +93,7 @@ class QBittorrentClient:
                 data={"hashes": hash_str, "deleteFiles": config.delete_files},
             )
         except Exception as e:
-            logger.error(f"Failed to remove torrents| {e}")
+            logger.error(f"Failed to remove torrents | {e}")
 
     def version(self) -> str:
         self.authenticate()
@@ -104,5 +103,5 @@ class QBittorrentClient:
             )
             return response.text
         except Exception as e:
-            logger.error(f"Failed to fetch version| {e}")
+            logger.error(f"Failed to fetch version | {e}")
             return "unknown"

@@ -13,6 +13,7 @@ if os.name == "nt":
 
 logger.remove()
 logger.level("STARTUP", no=25, color="<cyan><bold>")
+logger.level("ACTION", no=25, color="<yellow><bold>")
 
 valid_levels = {"INFO", "WARNING", "ERROR", "CRITICAL"}
 if config.log_level not in valid_levels:
@@ -23,12 +24,13 @@ level_priority = {
     "STARTUP": 0,
     "CRITICAL": 1,
     "ERROR": 2,
-    "WARNING": 3,
-    "WARN": 3,
-    "INFO": 4,
+    "ACTION": 3,
+    "WARNING": 4,
+    "WARN": 4,
+    "INFO": 5,
 }
 
-min_priority = level_priority.get(config.log_level, 4)
+min_priority = level_priority.get(config.log_level, 5)
 
 
 def custom_filter(record):
@@ -38,11 +40,21 @@ def custom_filter(record):
     return level_priority.get(lvl, 100) <= min_priority
 
 
-logger.add(
-    sys.stdout,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> <level>[{level}]</level> <cyan>{message}</cyan>",
-    filter=custom_filter,
-    colorize=True,
-)
+if config.log_output in ["all", "stdout"]:
+    logger.add(
+        sys.stdout,
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> <level>[{level}]</level> <cyan>{message}</cyan>",
+        filter=custom_filter,
+        colorize=True,
+    )
+
+if config.log_output in ["all", "web"]:
+    logger.add(
+        "purgarr.log",
+        format="{time:YYYY-MM-DD HH:mm:ss} [{level}] {message}",
+        filter=custom_filter,
+        rotation="10 MB",
+        colorize=False,
+    )
 
 __all__ = ["logger"]

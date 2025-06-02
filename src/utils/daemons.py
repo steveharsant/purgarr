@@ -2,6 +2,7 @@ import time
 import utils.config as config
 import sys
 from utils.logger import *
+from utils.webui import *
 from services.sonarr import Sonarr
 from services.radarr import Radarr
 from services.qbittorrent import QBittorrentClient
@@ -26,6 +27,14 @@ class Daemons:
             logger.error(f"Failed to communicate with {config.torrent_client}")
             sys.exit(1)
 
+    def remove_log(self, type: str, torrents):
+        n = 0
+        for t in torrents:
+            n += 1
+            logger.log(
+                "ACTION", f"({n}/{len(torrents)}) Purging {type} torrent: {t['name']}"
+            )
+
     def imported_purgarr(self):
         while True:
             torrents = [
@@ -35,8 +44,9 @@ class Daemons:
             ]
 
             if torrents is not None:
-                logger.info(f"Purging {len(torrents)} imported torrents")
+                self.remove_log("imported", torrents)
                 self.torrent_client.remove_torrents([t["id"] for t in torrents])
+
             else:
                 logger.info(f"No imported torrents to purge")
 
@@ -68,7 +78,7 @@ class Daemons:
             ]
 
             if stalled_torrents:
-                logger.info(f"Purging {len(stalled_torrents)} stalled torrents")
+                self.remove_log("stalled", stalled_torrents)
                 self.torrent_client.remove_torrents([t["id"] for t in stalled_torrents])
 
             if stalled_torrents and config.block_stalled_torrents:
@@ -83,3 +93,9 @@ class Daemons:
             logger.info(m)
 
             time.sleep(config.purge_stalled_interval)
+
+    def webui(self):
+        server_address = ("", config.web_port)
+        httpd = HTTPServer(server_address, LogHandler)
+        logger.info(f"Starting log server at {config.web_host}:{config.web_port}")
+        httpd.serve_forever()

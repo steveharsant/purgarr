@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-version=$(awk -F\" '/__version__/ {print $2}' ./src/main.py)
+version=$(awk -F\" '/__version__/ {print $2}' ./src/main.py | head -n1)
 base_tag='ghcr.io/steveharsant/purgarr'
 
 echo "$GITHUB_TOKEN" | docker login ghcr.io -u steveharsant --password-stdin
