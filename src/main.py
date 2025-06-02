@@ -14,8 +14,11 @@ def main():
 
     d = Daemons()
 
-    server_thread = threading.Thread(target=d.webui, kwargs={"port": 9891}, daemon=True)
-    server_thread.start()
+    if config.log_output in ["all", "web"]:
+        server_thread = threading.Thread(
+            target=d.webui, kwargs={"port": config.web_port}, daemon=True
+        )
+        server_thread.start()
 
     if config.purge_imported:
         threading.Thread(

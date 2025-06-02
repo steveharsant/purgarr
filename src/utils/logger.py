@@ -38,18 +38,20 @@ def custom_filter(record):
     return level_priority.get(lvl, 100) <= min_priority
 
 
-logger.add(
-    sys.stdout,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> <level>[{level}]</level> <cyan>{message}</cyan>",
-    filter=custom_filter,
-    colorize=True,
-)
+if config.log_output in ["all", "stdout"]:
+    logger.add(
+        sys.stdout,
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> <level>[{level}]</level> <cyan>{message}</cyan>",
+        filter=custom_filter,
+        colorize=True,
+    )
 
-logger.add(
-    "purgarr.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} [{level}] {message}",
-    filter=custom_filter,
-    rotation="10 MB",
-)
+if config.log_output in ["all", "web"]:
+    logger.add(
+        "purgarr.log",
+        format="{time:YYYY-MM-DD HH:mm:ss} [{level}] {message}",
+        filter=custom_filter,
+        rotation="10 MB",
+    )
 
 __all__ = ["logger"]
