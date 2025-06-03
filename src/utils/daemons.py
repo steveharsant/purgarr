@@ -99,3 +99,5 @@ class Daemons:
         httpd = HTTPServer(server_address, LogHandler)
         logger.info(f"Starting log server at {config.web_host}:{config.web_port}")
         httpd.serve_forever()
+
+    def extension_purgarr(self):

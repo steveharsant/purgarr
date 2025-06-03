@@ -83,6 +83,18 @@ class QBittorrentClient:
 
         return results
 
+    def get_torrent_files(self, torrent: list) -> list:
+        try:
+            response = self.session.get(
+                f"{config.qbit_url}/torrents/files",
+                params={"hash": torrent["id"]},
+                cookies={"SID": self.sid},
+            )
+            return response.json()
+        except:
+            logger.error(f"Failed to get files for torrent: {torrent['name']}")
+            return []
+
     def remove_torrents(self, hashes: list):
         self.authenticate()
         hash_str = "|".join(hashes)
