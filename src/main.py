@@ -6,7 +6,7 @@ import sys
 import threading
 import time
 
-__version__ = "0.2.0"
+__version__ = "0.3.0-alpha1"
 
 
 def main():
@@ -18,6 +18,16 @@ def main():
         logger.log("STARTUP", "Starting Purgarr webUI daemon")
         server_thread = threading.Thread(target=d.webui, daemon=True)
         server_thread.start()
+
+    if config.purge_extensions:
+        logger.log("STARTUP", "Starting banned extension Purgarr daemon")
+        logger.info(
+            f"Checking for banned extensions every {config.purge_extensions_interval} seconds"
+        )
+        threading.Thread(
+            target=lambda: d.extension_purgarr(),
+            daemon=True,
+        ).start()
 
     if config.purge_imported:
         logger.log("STARTUP", "Starting import Purgarr daemon")

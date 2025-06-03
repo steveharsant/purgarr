@@ -101,3 +101,37 @@ class Daemons:
         httpd.serve_forever()
 
     def extension_purgarr(self):
+        if config.purge_extensions is not True:
+            return
+
+        while True:
+            for t in self.torrent_client.get_torrents():
+                for f in self.torrent_client.get_torrent_files(t):
+
+                    ext = os.path.splitext(f["name"])[1].lower().replace(".", "", 1)
+
+                    if ext in config.blocked_extensions:
+                        source = "unknown"
+                        if t["category"] in config.sonarr_labels:
+                            source = "Sonarr"
+                        elif t["category"] in config.radarr_labels:
+                            source = "Radarr"
+
+                        if source != "unknown":
+                            logger.info(
+                                f"Removing torrent from {source}: {t['name']} with file extension match: .{ext}"
+                            )
+
+                        match source:
+                            case "Sonarr":
+                                self.service = self.sonarr
+                            case "Radarr":
+                                self.service = self.radarr
+
+                        self.torrent_client.remove_torrents(t["id"])
+                        self.service.block_release((t["name"], t["id"]))
+
+            # logger.info(
+            #     f"{config.purge_extensions_interval} seconds until next file extension purge"
+            # )
+            time.sleep(config.purge_extensions_interval)

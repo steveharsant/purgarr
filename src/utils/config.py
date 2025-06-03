@@ -9,15 +9,25 @@ def ensure_http(url):
 
 
 # Purgarr Behaviour
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
-purge_stalled = os.getenv("PURGE_STALLED", "True").lower() == "true"
-purge_stalled_interval = int(os.getenv("PURGE_STALLED_INTERVAL", 300))
 block_stalled_torrents = os.getenv("BLOCK_STALLED_TORRENTS", "True").lower() == "true"
+delete_files = os.getenv("DELETE_FILES", "True").lower() == "true"
+purge_extensions = os.getenv("PURGE_EXTENSIONS", "False").lower() == "true"
+purge_extensions_interval = int(os.getenv("PURGE_EXTENSIONS_INTERVAL", 60))
+blocked_extensions = (
+    os.getenv(
+        "BLOCKED_EXTENSIONS",
+        "exe,bat,cmd,com,scr,pif,vbs,js,ps1,sh,zip,rar,7z,tar.gz,lnk,arj",
+    )
+    .lower()
+    .split(",")
+)
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+log_output = os.getenv("LOG_OUTPUT", "all").lower()
 purge_imported = os.getenv("PURGE_IMPORTED", "True").lower() == "true"
 purge_imported_interval = int(os.getenv("PURGE_IMPORTED_INTERVAL", 600))
-delete_files = os.getenv("DELETE_FILES", "True").lower() == "true"
+purge_stalled = os.getenv("PURGE_STALLED", "True").lower() == "true"
+purge_stalled_interval = int(os.getenv("PURGE_STALLED_INTERVAL", 300))
 retry_search = os.getenv("RETRY_SEARCH", "True").lower() == "true"
-log_output = os.getenv("LOG_OUTPUT", "all").lower()
 web_host = os.getenv("WEB_HOST", "http://localhost").lower()
 web_port = int(os.getenv("WEB_PORT", 9891))
 
