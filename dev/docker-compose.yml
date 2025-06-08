@@ -1,0 +1,108 @@
+services:
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/radarr/data:/config
+      - ./services/radarr/movies:/movies
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/sonarr/data:/config
+      - ./services/sonarr/tv:/tv
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+# Torrent Clients
+  deluge:
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/deluge/config:/config
+    ports:
+      - 8112:8112         # Web UI
+      - 6882:6881         # TCP (remapped)
+      - 6882:6881/udp     # UDP (remapped)
+      - 58846:58846
+    restart: unless-stopped
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - USER=admin
+      - PASS=adminadmin
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/transmission/data:/config
+    ports:
+      - 9091:9091         # Web UI
+      - 5141:51413       # TCP (remapped)
+      - 5141:51413/udp   # UDP (remapped)
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8081   # (remapped)
+      - TORRENTING_PORT=6883
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/qbittorrent/appdata:/config
+    ports:
+      - 8081:8081         # Web UI (remapped)
+      - 6883:6881         # TCP (remapped)
+      - 6883:6881/udp     # UDP (remapped)
+    restart: unless-stopped
+
+# Additional Services
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    networks:
+      - purgarr_dev
+    volumes:
+      - ./services/prowlarr/data:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+networks:
+  purgarr_dev:
