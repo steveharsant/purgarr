@@ -11,6 +11,7 @@ services:
       - purgarr_dev
     volumes:
       - ./services/radarr/data:/config
+      - ./services/shared/downloads:/downloads
       - ./services/radarr/movies:/movies
     ports:
       - 7878:7878
@@ -26,6 +27,7 @@ services:
       - purgarr_dev
     volumes:
       - ./services/sonarr/data:/config
+      - ./services/shared/downloads:/downloads
       - ./services/sonarr/tv:/tv
     ports:
       - 8989:8989
@@ -43,6 +45,7 @@ services:
       - purgarr_dev
     volumes:
       - ./services/deluge/config:/config
+      - ./services/shared/downloads:/downloads
     ports:
       - 8112:8112         # Web UI
       - 6882:6881         # TCP (remapped)
@@ -63,6 +66,7 @@ services:
       - purgarr_dev
     volumes:
       - ./services/transmission/data:/config
+      - ./services/shared/downloads:/downloads
     ports:
       - 9091:9091         # Web UI
       - 5141:51413       # TCP (remapped)
@@ -82,6 +86,7 @@ services:
       - purgarr_dev
     volumes:
       - ./services/qbittorrent/appdata:/config
+      - ./services/shared/downloads:/downloads
     ports:
       - 8081:8081         # Web UI (remapped)
       - 6883:6881         # TCP (remapped)
