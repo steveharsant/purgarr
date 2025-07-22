@@ -37,12 +37,12 @@ services:
     image: ghcr.io/steveharsant/purgarr:latest
     container_name: purgarr
     environment:
-      - QBIT_URL='ip-address-or-hostname-with-port'
-      - QBIT_PASSWORD='password'
-      - SONARR_API_KEY='password'
-      - SONARR_URL='ip-address-or-hostname-with-port'
-      - RADARR_API_KEY='password'
-      - RADARR_URL='ip-address-or-hostname-with-port'
+      - QBIT_URL=ip-address-or-hostname-with-port
+      - QBIT_PASSWORD=password
+      - SONARR_API_KEY=password
+      - SONARR_URL=ip-address-or-hostname-with-port
+      - RADARR_API_KEY=password
+      - RADARR_URL=ip-address-or-hostname-with-port
     ports:
       - 9891:9891
     restart: unless-stopped
