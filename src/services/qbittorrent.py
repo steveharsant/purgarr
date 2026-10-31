@@ -9,6 +9,7 @@ class QBittorrentClient:
     def __init__(self):
         self.session = requests.Session()
         self.sid = None
+        self.sid_name = "SID"
         self.last_sid_refresh = 0
 
     def authenticate(self):
@@ -30,11 +31,17 @@ class QBittorrentClient:
             logger.error(f"qBittorrent authentication failed | {e}")
             return
 
-        if not "SID" in response.cookies:
+        # qBittorrent 5.2 renames the session cookie per listening port
+        sid_name = next(
+            (name for name in response.cookies if name.startswith("QBT_SID")),
+            "SID" if "SID" in response.cookies else None,
+        )
+        if sid_name is None:
             logger.error("SID cookie not found in response")
             return
 
-        self.sid = response.cookies["SID"]
+        self.sid_name = sid_name
+        self.sid = response.cookies[sid_name]
         self.last_sid_refresh = now
 
     def get_torrents(self) -> list:
@@ -42,7 +49,7 @@ class QBittorrentClient:
 
         try:
             response = self.session.get(
-                f"{config.qbit_url}/torrents/info", cookies={"SID": self.sid}
+                f"{config.qbit_url}/torrents/info", cookies={self.sid_name: self.sid}
             )
         except Exception as e:
             logger.error(f"Failed to get torrents| {e}")
@@ -89,7 +96,7 @@ class QBittorrentClient:
         try:
             self.session.post(
                 f"{config.qbit_url}/torrents/delete",
-                cookies={"SID": self.sid},
+                cookies={self.sid_name: self.sid},
                 data={"hashes": hash_str, "deleteFiles": config.delete_files},
             )
         except Exception as e:
@@ -99,7 +106,7 @@ class QBittorrentClient:
         self.authenticate()
         try:
             response = self.session.get(
-                f"{config.qbit_url}/app/version", cookies={"SID": self.sid}
+                f"{config.qbit_url}/app/version", cookies={self.sid_name: self.sid}
             )
             return response.text
         except Exception as e:
